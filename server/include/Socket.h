@@ -1,6 +1,9 @@
 #ifndef SERVER_SOCKET_H_
 #define SERVER_SOCKET_H_
 
+#include <netinet/in.h>
+#include <sys/epoll.h>
+
 #define EPOLL_SIZE 10000
 #define PORT 9999
 #define HOST "127.0.0.1"
