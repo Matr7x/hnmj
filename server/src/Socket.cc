@@ -1,6 +1,17 @@
 #include "Socket.h"
 
+#include <iostream>
+#include <strings.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <errno.h>
+
+using std::cout;
+using std::endl;
+
 namespace server {
+
+Socket::Socket() {}
 
 int Socket::Init() {
   int code = 0;
@@ -18,6 +29,14 @@ int Socket::Init() {
     cout << "Init socket failed." << endl;
     return 255;
   }
+
+  code = InitEpoll();
+  if (0 != code) {
+    cout << "Init epoll failed." << endl;
+    return 255;
+  }
+
+  return 0;
 }
 
 int Socket::Run() {
@@ -25,19 +44,35 @@ int Socket::Run() {
     // 等待事件
     int count = epoll_wait(epoll_fd_, events_, EPOLL_SIZE, EPOLL_RUN_TIMEOUT);
     if (count < 0) {
-      cout << "Fatal: wait epoll event failed." << endl;
+      cout << "Fatal: wait epoll event failed. errno[" << errno << "]" << endl;
       return 255;
     }
 
+    cout << count << endl;
+    cout << EPOLLERR << endl;
+    cout << EPOLLHUP << endl;
+
     // 解析事件
     for (int i = 0; i < count; i++) {
+      cout << events_[i].events << endl;
+      if ((events_[i].events & EPOLLERR) ||
+              (events_[i].events & EPOLLHUP) ||
+              (!(events_[i].events & EPOLLIN)))
+      {
+              /* An error has occured on this fd, or the socket is not
+                 ready for reading (why were we notified then?) */
+cout << "epoll error" << endl;
+        continue;
+      }
       // 来自监听的事件
       if (events_[i].data.fd == listener_) {
         // 接收请求
+        socklen_t sock_len = sizeof(struct sockaddr_in);
         int client = accept(listener_, 
             (struct sockaddr *)&client_addr_, 
-            sizeof(struct sockaddr_in));
+            &sock_len);
 
+        cout << client << endl;
         // 设置nonblocking
         SetNonBlocking(client);
 
@@ -61,7 +96,7 @@ int Socket::Run() {
   }
 }
 
-int Socket::HnadleMessage(int client) {
+int Socket::HandleMessage(int client) {
   // 初始化buffer和length
   char buf[BUF_SIZE];
   bzero(buf, BUF_SIZE);
@@ -81,6 +116,8 @@ int Socket::HnadleMessage(int client) {
   } else {
     ProcessMessage(buf, len);
   }
+
+  return 0;
 }
 
 int Socket::ProcessMessage(char * buf, int size) {
@@ -104,17 +141,30 @@ int Socket::InitSocket() {
   }
 
   int code = SetNonBlocking(listener_);
-  if (0 !== code) {
+  if (0 != code) {
     cout << "Set non blocking for listerner failed." << endl;
     return 255;
   }
+
+  code = bind(listener_, (struct sockaddr *)&addr_, sizeof(addr_));
+  if (0 != code) {
+    cout << "Bind failed. errno[" << errno << "]" << endl;
+    return 255;
+  }
+
+  code = listen(listener_, 128);
+  if (0 != code) {
+    cout << "Listen failed. errno[" << errno << "]" << endl;
+    return 255;
+  }
+
   return 0;
 }
 
 int Socket::SetNonBlocking(int sock) {
-  int code = fcntl(sock, F_SETFL, fcntl(sockfd, F_GETFL, 0) | O_NONBLOCK);
+  int code = fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
   if (code < 0) {
-    cout << "Set non blocking failed!" << endl;
+    cout << "Set non blocking failed! errno[" << errno << "]"<< endl;
     return 255;
   }
   return 0;

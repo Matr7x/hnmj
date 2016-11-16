@@ -3,6 +3,7 @@
 #include "MJTable.h"
 
 #include <iostream>
+#include <string.h>
 
 using std::cin;
 using std::cout;

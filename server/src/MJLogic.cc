@@ -195,7 +195,7 @@ bool MJLogic::EstimateHu(CardIndex cards_index[MAX_CARDS_INDEX], CardValue card)
   }
 
   bool hu = false;
-  for (int i = 0; i < two_cards_index.size(); i++) {
+  for (size_t i = 0; i < two_cards_index.size(); i++) {
     CardIndex temp_cards_index[MAX_CARDS_INDEX];
     memset(temp_cards_index, 0, sizeof(temp_cards_index));
     memcpy(temp_cards_index, cards_index, sizeof(temp_cards_index));

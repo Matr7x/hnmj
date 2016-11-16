@@ -28,4 +28,6 @@
 *.out
 *.app
 
+# Custom
 *.swp
+bin/*

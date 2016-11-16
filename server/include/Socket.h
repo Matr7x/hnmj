@@ -3,11 +3,15 @@
 
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include <list>
+
+using std::list;
 
 #define EPOLL_SIZE 10000
-#define PORT 9999
+#define PORT 3456
 #define HOST "127.0.0.1"
 #define BUF_SIZE 1024
+#define EPOLL_RUN_TIMEOUT -1
 
 namespace server {
 
