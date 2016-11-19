@@ -6,9 +6,12 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <netinet/tcp.h>
 
 using std::cout;
 using std::endl;
+
+#define DEBUG
 
 namespace server {
 
@@ -80,7 +83,8 @@ void SocketEngine::Accept(int fd) {
   socklen_t sock_len = sizeof(struct sockaddr_in);
   int client = accept(fd, (struct sockaddr *)&client_addr_, &sock_len);
 
-  cout << "Accept client %d" << client << endl;
+  cout << "Accept client sock[" << client << "]" << " ip[" << inet_ntoa(client_addr_.sin_addr) 
+    << "]" << endl;
 
   // 设置nonblocking
   SetNonBlocking(client);
@@ -98,45 +102,54 @@ void SocketEngine::Accept(int fd) {
 }
 
 void SocketEngine::Read(int fd) {
+  int total_read = 0;
   int buf_read = 0;
   memset(buffer_, 0, sizeof(buffer_));
   while ((buf_read = read(fd, buffer_, BUF_SIZE)) > 0) {
+    //cout << buf_read;
+    cout << buffer_ << endl;
+
     // TODO: Process readed stream
-    cout << buf_read;
+    
+    memset(buffer_, 0, sizeof(buffer_));
+    total_read += buf_read;
   }
 
+  // 判断连接
+  /*
+  struct tcp_info info; 
+  int len=sizeof(info); 
+  getsockopt(fd, IPPROTO_TCP, TCP_INFO, &info, (socklen_t *)&len); 
+  if((info.tcpi_state == TCP_ESTABLISHED)) {
+    cout << "connected" << endl;
+  } else {
+    cout << "closed" << endl;
+  }
+  */
+
+  // 判断是否链接
+  if (0 == total_read && 0 == buf_read) {
+    // 处理关闭连接
+    cout << "client " << fd << " closed" << endl;
+    return;
+  } 
+  
+  // 判断是否正常读取0
+  if (0 == buf_read) {
+    return;
+  }
+
+  // 本次读取完毕，返回EAGAIN
   if (-1 == buf_read && EAGAIN == errno) {
     return;
-  } else {
-    cout << "Fatal: Unknow read error." << endl;
+  } 
+  // 位置错误
+  else {
+    cout << "Fatal: Unknow read error. errno[" << errno << "]" << endl;
   }
 }
 
 void SocketEngine::Write(int fd) {
-}
-
-int SocketEngine::HandleMessage(int client) {
-  // 初始化buffer和length
-  char buf[BUF_SIZE];
-  bzero(buf, BUF_SIZE);
-  int len = 0;
-
-  len = recv(client, buf, BUF_SIZE, 0);
-
-  if (len < 0) {
-    cout << "Recv failed." << endl;
-    return 255;
-  }
-  
-  if (0 == len) {
-    // 客户端关闭
-    close(client);
-    clients_.remove(client);
-  } else {
-    ProcessMessage(buf, len);
-  }
-
-  return 0;
 }
 
 int SocketEngine::ProcessMessage(char * buf, int size) {
@@ -153,6 +166,11 @@ int SocketEngine::InitAddr() {
 
 int SocketEngine::InitSocket() {
   listener_ = socket(PF_INET, SOCK_STREAM, 0);
+
+#ifdef DEBUG
+  int on = 1;
+  setsockopt(listener_,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on));
+#endif
 
   if (listener_ < 0) {
     cout << "Create socket failed!" << endl;

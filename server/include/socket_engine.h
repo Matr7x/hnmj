@@ -30,7 +30,6 @@ private:
   int InitSocket();
   int SetNonBlocking(int sock);
   int InitEpoll();
-  int HandleMessage(int client);
   int ProcessMessage(char * buf, int size);
   void Loop();
   void Accept(int fd);
@@ -45,7 +44,7 @@ private:
   struct epoll_event events_[EPOLL_SIZE];// 客户端epoll事件
   int epoll_fd_;                                // epoll fd
   list<int> clients_;                           // 客户端列表
-  char* buffer_[BUF_SIZE];                      // 缓冲区大小
+  char buffer_[BUF_SIZE];                       // 缓冲区大小
 
 
 };
