@@ -1,9 +1,9 @@
 #ifndef SERVER_MJ_PLAYER_H_
 #define SERVER_MJ_PLAYER_H_
 
-#include "MJLogic.h"
-#include "IRobot.h"
-#include "CardGroup.h"
+#include "mj_logic.h"
+#include "i_robot.h"
+#include "card_group.h"
 
 #define MAX_PLAYER_CARD_COUNT 14
 

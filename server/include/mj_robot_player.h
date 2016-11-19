@@ -1,7 +1,7 @@
 #ifndef SERVER_MJ_ROBOT_PLAYER_H_
 #define SERVER_MJ_ROBOT_PLAYER_H_
 
-#include "MJPlayer.h"
+#include "mj_player.h"
 
 namespace server {
 

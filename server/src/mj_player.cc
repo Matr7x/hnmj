@@ -1,6 +1,6 @@
-#include "MJPlayer.h"
+#include "mj_player.h"
 
-#include "MJTable.h"
+#include "mj_table.h"
 
 #include <iostream>
 #include <string.h>

@@ -1,9 +1,9 @@
 #ifndef SERVER_MJ_TABLE_H_
 #define SERVER_MJ_TABLE_H_
 
-#include "MJLogic.h"
-#include "MJPlayer.h"
-#include "MJRobotPlayer.h"
+#include "mj_logic.h"
+#include "mj_player.h"
+#include "mj_robot_player.h"
 
 #define MAX_PLAYERS 4
 
@@ -12,7 +12,10 @@ namespace server {
 class MJTable {
 public:
   MJTable();
-  // TODO: AddRobotPlayer
+
+public:
+  // 玩家坐下
+  int Sit(MJPlayer* player);
   int CreatePlayer(long user_id);
   int CreateRobotPlayer();
   int DestroyPlayer(MJPlayer* player);

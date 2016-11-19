@@ -1,4 +1,4 @@
-#include "MJLogic.h"
+#include "mj_logic.h"
 
 #include <cstring>
 #include <cstdlib>

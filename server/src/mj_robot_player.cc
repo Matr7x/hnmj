@@ -1,4 +1,4 @@
-#include "MJRobotPlayer.h"
+#include "mj_robot_player.h"
 
 namespace server {
 

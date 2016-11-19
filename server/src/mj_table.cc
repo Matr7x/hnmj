@@ -1,4 +1,4 @@
-#include "MJTable.h"
+#include "mj_table.h"
 
 #include <iostream>
 #include <string.h>

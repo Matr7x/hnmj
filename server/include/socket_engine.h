@@ -15,7 +15,7 @@ using std::list;
 
 namespace server {
 
-class Socket {
+class SocketEngine {
 
 public:
   Socket();

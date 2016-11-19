@@ -1,7 +1,7 @@
 #include "MJLogic.h"
 
-#include "MJTable.h"
-#include "Socket.h"
+#include "mj_table.h"
+#include "socket.h"
 
 #include <iostream>
 
@@ -38,15 +38,15 @@ int main(int argc, char* argv[]) {
   
   int code = 0;
 
-  Socket socket;
-  code = socket.Init();
+  SocketEngine socket_engine;
+  code = socket_engine.Init();
   if (0 != code) {
-    cout << "Init socket failed" << endl;
+    cout << "Init socket engine failed" << endl;
     return 255;
   }
-  code = socket.Run();
+  code = socket_engine.Run();
   if (0 != code) {
-    cout << "Socket run failed" << endl;
+    cout << "Socket engine run failed" << endl;
     return 255;
   }
   

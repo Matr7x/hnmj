@@ -1,4 +1,4 @@
-#include "Socket.h"
+#include "socket_engine.h"
 
 #include <iostream>
 #include <strings.h>
@@ -11,9 +11,9 @@ using std::endl;
 
 namespace server {
 
-Socket::Socket() {}
+SocketEngine::Socket() {}
 
-int Socket::Init() {
+int SocketEngine::Init() {
   int code = 0;
 
   // 初始化地址
@@ -39,7 +39,7 @@ int Socket::Init() {
   return 0;
 }
 
-int Socket::Run() {
+int SocketEngine::Run() {
   while (true) {
     // 等待事件
     int count = epoll_wait(epoll_fd_, events_, EPOLL_SIZE, EPOLL_RUN_TIMEOUT);
@@ -96,7 +96,7 @@ cout << "epoll error" << endl;
   }
 }
 
-int Socket::HandleMessage(int client) {
+int SocketEngine::HandleMessage(int client) {
   // 初始化buffer和length
   char buf[BUF_SIZE];
   bzero(buf, BUF_SIZE);
@@ -120,19 +120,19 @@ int Socket::HandleMessage(int client) {
   return 0;
 }
 
-int Socket::ProcessMessage(char * buf, int size) {
+int SocketEngine::ProcessMessage(char * buf, int size) {
   // TODO: 处理Message
   return 0;
 }
 
-int Socket::InitAddr() {
+int SocketEngine::InitAddr() {
   addr_.sin_family = PF_INET;
   addr_.sin_port = htons(PORT);
   addr_.sin_addr.s_addr = inet_addr(HOST);
   return 0;
 }
 
-int Socket::InitSocket() {
+int SocketEngine::InitSocket() {
   listener_ = socket(PF_INET, SOCK_STREAM, 0);
 
   if (listener_ < 0) {
@@ -161,7 +161,7 @@ int Socket::InitSocket() {
   return 0;
 }
 
-int Socket::SetNonBlocking(int sock) {
+int SocketEngine::SetNonBlocking(int sock) {
   int code = fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
   if (code < 0) {
     cout << "Set non blocking failed! errno[" << errno << "]"<< endl;
@@ -170,7 +170,7 @@ int Socket::SetNonBlocking(int sock) {
   return 0;
 }
 
-int Socket::InitEpoll() {
+int SocketEngine::InitEpoll() {
   // 创建epoll
   epoll_fd_ = epoll_create(EPOLL_SIZE);
   if (epoll_fd_ < 0) {
