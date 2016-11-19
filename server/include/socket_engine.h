@@ -9,8 +9,8 @@ using std::list;
 
 #define EPOLL_SIZE 10000
 #define PORT 3456
-#define HOST "127.0.0.1"
-#define BUF_SIZE 1024
+#define HOST "115.28.223.181"
+#define BUF_SIZE 65536
 #define EPOLL_RUN_TIMEOUT -1
 
 namespace server {
@@ -18,7 +18,7 @@ namespace server {
 class SocketEngine {
 
 public:
-  Socket();
+  SocketEngine();
 
 public:
   int Init();
@@ -32,6 +32,10 @@ private:
   int InitEpoll();
   int HandleMessage(int client);
   int ProcessMessage(char * buf, int size);
+  void Loop();
+  void Accept(int fd);
+  void Read(int fd);
+  void Write(int fd);
 
 private:
   int listener_;                                // 监听socket
@@ -41,6 +45,7 @@ private:
   struct epoll_event events_[EPOLL_SIZE];// 客户端epoll事件
   int epoll_fd_;                                // epoll fd
   list<int> clients_;                           // 客户端列表
+  char* buffer_[BUF_SIZE];                      // 缓冲区大小
 
 
 };

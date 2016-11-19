@@ -1,13 +1,15 @@
 #include "room.h"
 
+#include "mj_table.h"
+
 namespace server{
 
-Room::Room() player_count_(0), status_(0) {
-  MJTable* table = new MJTable();
+Room::Room() : player_count_(0), status_(0) {
+  table_ = new MJTable();
 }
 
 Room::~Room() {
-  if (null != table) delete table;
+  if (0 != table_) delete table_;
   // TODO: delete player
 }
 
@@ -16,9 +18,9 @@ int Room::Join(int user_id) {
     return 1;
   }
   MJPlayer* player = new MJPlayer(user_id);
-  player_map_(user_id) = paleyr;
+  player_map_[user_id] = player;
   player_count_++;
-  table->Sit(player);
+  table_->Sit(player);
   return 0;
 }
 
@@ -29,7 +31,7 @@ int Room::Leave(int user_id) {
   // 删除Player
   if (it != player_map_.end()) {
     delete it->second;
-    player_map_->erase(it);
+    player_map_.erase(it);
     return 0;
   }
 

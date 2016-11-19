@@ -1,6 +1,6 @@
 #include "thread.h"
 
-namespace thread {
+namespace server {
 
 int Thread::Start()
 {

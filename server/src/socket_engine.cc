@@ -5,13 +5,14 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string.h>
 
 using std::cout;
 using std::endl;
 
 namespace server {
 
-SocketEngine::Socket() {}
+SocketEngine::SocketEngine() {}
 
 int SocketEngine::Init() {
   int code = 0;
@@ -41,59 +42,77 @@ int SocketEngine::Init() {
 
 int SocketEngine::Run() {
   while (true) {
-    // 等待事件
-    int count = epoll_wait(epoll_fd_, events_, EPOLL_SIZE, EPOLL_RUN_TIMEOUT);
-    if (count < 0) {
-      cout << "Fatal: wait epoll event failed. errno[" << errno << "]" << endl;
-      return 255;
-    }
+    Loop();
+  }
+  return 0;
+}
 
-    cout << count << endl;
-    cout << EPOLLERR << endl;
-    cout << EPOLLHUP << endl;
+void SocketEngine::Loop() {
+  // 等待事件
+  int count = epoll_wait(epoll_fd_, events_, EPOLL_SIZE, EPOLL_RUN_TIMEOUT);
+  if (count < 0) {
+    cout << "Fatal: wait epoll event failed. errno[" << errno << "]" << endl;
+    return;
+  }
 
-    // 解析事件
-    for (int i = 0; i < count; i++) {
-      cout << events_[i].events << endl;
-      if ((events_[i].events & EPOLLERR) ||
-              (events_[i].events & EPOLLHUP) ||
-              (!(events_[i].events & EPOLLIN)))
-      {
-              /* An error has occured on this fd, or the socket is not
-                 ready for reading (why were we notified then?) */
-cout << "epoll error" << endl;
-        continue;
+  // 解析事件
+  for (int i = 0; i < count; i++) {
+    int fd = events_[i].data.fd;
+    int events = events_[i].events;
+
+    if (events & EPOLLIN ) {
+      if (fd == listener_) {
+        Accept(fd);
+      } else {
+        Read(fd);
       }
-      // 来自监听的事件
-      if (events_[i].data.fd == listener_) {
-        // 接收请求
-        socklen_t sock_len = sizeof(struct sockaddr_in);
-        int client = accept(listener_, 
-            (struct sockaddr *)&client_addr_, 
-            &sock_len);
-
-        cout << client << endl;
-        // 设置nonblocking
-        SetNonBlocking(client);
-
-        // 添加client监听事件
-        event_.data.fd = client;
-        int code = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client, &event_);
-        if (code < 0) {
-          cout << "Client add epoll event failed" << endl;
-          return 255;
-        }
-      } 
-      // 来自客户端的事件
-      else {
-        int code = HandleMessage(events_[i].data.fd);
-        if (0 != code) {
-          cout << "Handle Message failed." << endl;
-          return 255;
-        }
-      }
+    } else if (events & EPOLLOUT) {
+      Write(fd);
+    } else {
+      cout << "Fatal: Unknow event "<< endl;
+      return;
     }
   }
+}
+
+void SocketEngine::Accept(int fd) {
+  // 接收请求
+  socklen_t sock_len = sizeof(struct sockaddr_in);
+  int client = accept(fd, (struct sockaddr *)&client_addr_, &sock_len);
+
+  cout << "Accept client %d" << client << endl;
+
+  // 设置nonblocking
+  SetNonBlocking(client);
+
+  // 添加client监听事件
+  event_.data.fd = client;
+  event_.events = EPOLLIN | EPOLLOUT | EPOLLET; // 读，边沿触发
+  int code = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client, &event_);
+  if (code < 0) {
+    cout << "Client add epoll event failed" << endl;
+    return;
+  }
+
+  clients_.push_back(client);
+}
+
+void SocketEngine::Read(int fd) {
+  int buf_read = 0;
+  memset(buffer_, 0, sizeof(buffer_));
+  while ((buf_read = read(fd, buffer_, BUF_SIZE)) > 0) {
+    // TODO: Process readed stream
+    cout << buf_read;
+  }
+
+  if (-1 == buf_read && EAGAIN == errno) {
+    return;
+  } else {
+    cout << "Fatal: Unknow read error." << endl;
+  }
+}
+
+void SocketEngine::Write(int fd) {
 }
 
 int SocketEngine::HandleMessage(int client) {
@@ -162,6 +181,7 @@ int SocketEngine::InitSocket() {
 }
 
 int SocketEngine::SetNonBlocking(int sock) {
+  // TODO: 需要区分开get和set
   int code = fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK);
   if (code < 0) {
     cout << "Set non blocking failed! errno[" << errno << "]"<< endl;

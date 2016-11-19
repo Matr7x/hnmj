@@ -1,7 +1,11 @@
 #ifndef SERVER_ROOM_MANAGER_H_
 #define SERVER_ROOM_MANAGER_H_
 
+#include "room.h"
+
 #include <map>
+
+using std::map;
 
 namespace server {
 

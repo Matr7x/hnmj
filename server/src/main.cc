@@ -1,7 +1,5 @@
-#include "MJLogic.h"
-
 #include "mj_table.h"
-#include "socket.h"
+#include "socket_engine.h"
 
 #include <iostream>
 
@@ -11,7 +9,7 @@ using std::endl;
 using server::MJTable;
 using server::MJLogic;
 using server::CardValue;
-using server::Socket;
+using server::SocketEngine;
 
 int main(int argc, char* argv[]) {
   // 代码
@@ -38,12 +36,15 @@ int main(int argc, char* argv[]) {
   
   int code = 0;
 
+  // 初始化Socket引擎
   SocketEngine socket_engine;
   code = socket_engine.Init();
   if (0 != code) {
     cout << "Init socket engine failed" << endl;
     return 255;
   }
+
+  // 启动Socket引擎
   code = socket_engine.Run();
   if (0 != code) {
     cout << "Socket engine run failed" << endl;

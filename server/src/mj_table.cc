@@ -12,6 +12,18 @@ MJTable::MJTable() {
   Init();
 }
 
+int MJTable::Sit(MJPlayer* player) {
+  // 桌子满，创建失败
+  if (IsFull()) {
+    return 255;
+  }
+
+  // 坐下
+  players_[player_count_] = player;
+  player_count_++;
+  return 0;
+}
+
 void MJTable::Init() {
   ResetCards();
   ResetPlayers();

@@ -1,4 +1,4 @@
-#include "room_manager.cc"
+#include "room_manager.h"
 
 namespace server {
 }

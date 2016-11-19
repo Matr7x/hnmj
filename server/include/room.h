@@ -1,9 +1,11 @@
 #ifndef SERVER_ROOM_H_
 #define SERVER_ROOM_H_
 
-#include "MJPlayer.h"
+#include "mj_player.h"
 
 #include <map>
+
+using std::map;
 
 namespace server {
 
