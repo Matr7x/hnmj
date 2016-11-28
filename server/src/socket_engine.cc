@@ -165,6 +165,7 @@ int SocketEngine::ProcessMessage(char * buf, int size) {
 int SocketEngine::InitAddr() {
   addr_.sin_family = PF_INET;
   addr_.sin_port = htons(PORT);
+  // TODO: inet_addr已过时，可以用更新的函数代替
   addr_.sin_addr.s_addr = inet_addr(HOST);
   return 0;
 }
