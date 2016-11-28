@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 
-namespace xone { 
+namespace server { 
 
 // When we successfully initialized Mutex, we think Lock() and 
 // Unlock() would not be error based on linux interface manpage,

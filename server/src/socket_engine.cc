@@ -1,5 +1,8 @@
 #include "socket_engine.h"
 
+#include "singleton.h"
+#include "message_handler.h"
+
 #include <iostream>
 #include <strings.h>
 #include <arpa/inet.h>
@@ -110,6 +113,8 @@ void SocketEngine::Read(int fd) {
     cout << buffer_ << endl;
 
     // TODO: Process readed stream
+    unsigned int processed = 0;
+    Singleton<MessageHandler>::GetInstance()->Parse(buffer_, buf_read, processed);
     
     memset(buffer_, 0, sizeof(buffer_));
     total_read += buf_read;

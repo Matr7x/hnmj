@@ -33,10 +33,14 @@ void MessageHandler::Parse(void* buf, unsigned int size, unsigned int& processed
 }
 
 void MessageHandler::ProcessMessage(MsgBuf* msg_buf) {
-  cout << msg_buf->msg_head.msg_info.type << " " 
+  cout << (unsigned)msg_buf->msg_head.msg_info.type << " " 
+    << (unsigned)msg_buf->msg_head.msg_info.check_code << " " 
     << msg_buf->msg_head.msg_info.package_size << " " 
     << msg_buf->msg_head.msg_cmd.main_cmd << " " 
     << msg_buf->msg_head.msg_cmd.sub_cmd << endl;
+  if (msg_buf->msg_head.msg_info.package_size > sizeof(MsgHead)) {
+    cout << msg_buf->msg_buf << endl;
+  }
 }
 
 } // namespace server

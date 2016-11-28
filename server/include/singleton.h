@@ -4,7 +4,7 @@
 #include <new>
 #include "mutexes.h"
 
-namespace xone {
+namespace server {
 // Singleton design pattern
 // the way you properly use it is as followed:
 // class YourClass {

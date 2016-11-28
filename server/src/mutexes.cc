@@ -3,7 +3,7 @@
 #include "mutexes.h"
 #include "log_printer.h"
 
-namespace xone {
+namespace server {
 
 Mutex::Mutex() {
   int ret = pthread_mutex_init(&mutex_, NULL);
